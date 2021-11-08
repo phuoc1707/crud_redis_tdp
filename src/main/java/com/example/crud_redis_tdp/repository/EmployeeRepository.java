@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class EmployeeRepository {
@@ -29,26 +30,38 @@ public class EmployeeRepository {
     }
     public void saveEmployee(Employee employee){
 //        hashOperations.put("EMPLOYEE", employee.getId(), employee);
-        listOperations.leftPush("EMPLOYEE_LIST",employee);
+//        listOperations.leftPush("EMPLOYEE_LIST",employee);
+        setOperations.add("EMPLOYEE_SET",employee);
     }
 
-    public List<Employee> findAll(){
 
-//        return hashOperations.values("EMPLOYEE");
+    public Set<Employee> findAll(){
+/*
+        hash
+        return hashOperations.values("EMPLOYEE");
+        list
         Long lastIndex = listOperations.size("EMPLOYEE_LIST") - 1;
         return listOperations.range("EMPLOYEE_LIST", 0, lastIndex);
+*/
+
+        return setOperations.members("EMPLOYEE_SET");
+
     }
 
     public Employee findById(Integer id){
+//        hash
 //        return (Employee) hashOperations.get("EMPLOYEE", id);
 
-        List<Employee> employees = findAll();
+//        list && set
+
+        Set<Employee> employees = findAll();
         for (Employee employee : employees) {
             if (employee.getId() == id)
                 return employee;
         }
 
         return new Employee();
+
 
     }
 
@@ -58,7 +71,8 @@ public class EmployeeRepository {
     public void delete(Integer id){
 //        hashOperations.delete("EMPLOYEE", id);
 
-        listOperations.rightPopAndLeftPush("EMPLOYEE_LIST", id);
+//        listOperations.rightPopAndLeftPush("EMPLOYEE_LIST", id);
+        setOperations.remove("EMPLOYEE_SET", findById(id));
     }
 
 }
